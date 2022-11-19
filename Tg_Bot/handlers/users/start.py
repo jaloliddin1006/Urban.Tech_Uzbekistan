@@ -22,35 +22,32 @@ tz = pytz.timezone('Asia/Tashkent')
 
 td = datetime.now().date()
 
-
-async def djangoconnect(id=None, lat=None, lon=None):
+################################## Web site ni API dan doimiy ma'lumot olish va jo'natish ########################################################
+async def djangoconnect(user_id=None, lat=None, lon=None):
     if lat and lon:
-        # response =  requests.get(f"https://github.com/jaloliddin1006/deploy-commands/blob/main/{lat}.html")  
-        # data = response.json()[0]
-        
-        response =  requests.get(f"https://cbu.uz/uz/arkhiv-kursov-valyut/json/{lat}/{lon}")  
+
+        response =  requests.get(f"https://erty.uz/{user_id}/{lat}/{lon}")  
         data = response.json()[0]
+    elif user_id and not (lat and lon):
+        response =  requests.get(f"https://erty.uz/{user_id}/json/sells_product/")   
+        data = response.json()[0]
+        await bot.send_message(973108256, data['Rate'])
     else:
-        response =  requests.get(f"https://cbu.uz/uz/arkhiv-kursov-valyut/json/USD/18-11-2022")  
-        # response =  requests.get(f"https://heroku.com/djangoproject/")  
-        data = response.json()[0]
+        pass
         
-    await bot.send_message(973108256, data['Rate'])
-    print("---------------------------------",data['Rate'],"---------------------------------")
+    # print("-----------------------------------------------------------------")
             
-    
-
-
-    
     
     
 def schedule_jobs():
     scheduler.add_job(djangoconnect, "interval", seconds=16)
+##################################  ########################################################
 
 
 
 
 
+##################################  Start buyrug'ini uslash ##########################################
 
 @dp.message_handler(CommandStart(), state=None)
 async def bot_start(message: types.Message, state:FSMContext): 
@@ -63,18 +60,13 @@ async def bot_start(message: types.Message, state:FSMContext):
 
     await message.answer("Xush kelibsiz!", reply_markup=location)
 
-    
-    # await state.set_state("get_location")
 
 
 @dp.message_handler( IsPrivate(), state=None,text="📍 Mening joylashuvim")
 async def bot_start(message: types.Message, state:FSMContext):
     user = db.select_user(id=message.from_user.id)[3].split(",")
-    print(user)
     await bot.send_location(chat_id=message.from_user.id, latitude=user[0], longitude=user[1])
-
     await message.answer("yangi joylashuv manzilini tashlang", reply_markup=location_2)
-    # await state.set_state("get_location")
 
 
 @dp.message_handler( IsPrivate(), content_types=['location'])
@@ -84,16 +76,18 @@ async def bot_start(message: types.Message, state:FSMContext):
     # print(lat, lon)
     reply = f"latitude:  {lat}\nlongitude: {lon}"
     db.update_user_location(f"{lat},{lon}", message.from_user.id)
-    await message.answer(reply, reply_markup=main_btn)
-    # await state.set_state("get_ok")
+    await message.answer(reply, reply_markup=main_btn( message.from_user.id, lat, lon))
     await state.finish()
-
-
 
 @dp.message_handler( IsPrivate(), text="🔙 Ortga")
 async def bot_start(message: types.Message, state:FSMContext):
-    await message.answer("Bosh mennu", reply_markup=main_btn)
+    user = db.select_user(id= message.from_user.id)[3].split(",")
+    lat = user[0]
+    lon = user[1]
+    await message.answer("Bosh mennu", reply_markup=main_btn( message.from_user.id, lat, lon))
     await state.finish()
+    
+##################################  ########################################################
 
 
 
@@ -102,9 +96,6 @@ async def bot_start(message: types.Message, state:FSMContext):
 
 @dp.message_handler( IsPrivate(), state=None,text="🛡 Shikoyat bildirish")
 async def bot_start(message: types.Message, state:FSMContext):
-    # user = db.select_user(id=message.from_user.id)
-    # await bot.send_location(chat_id=message.from_user.id, latitude=user[0], longitude=user[1])
-
     await message.answer("Marxamat bizga/maxsulotlarimizga qanday shikoyat va arizalaringiz bor. Yozishingiz mumkin", reply_markup=types.ReplyKeyboardRemove())
     await state.set_state("shikoyat")
     # print()
@@ -113,66 +104,39 @@ async def bot_start(message: types.Message, state:FSMContext):
 @dp.message_handler( IsPrivate(), state="shikoyat")
 async def bot_start(message: types.Message, state:FSMContext):
     await message.answer("✅ Qabul qilindi")
-    await message.answer("Bosh mennu", reply_markup=main_btn)
+    user = db.select_user(id= message.from_user.id)[3].split(",")
+    lat = user[0]
+    lon = user[1]
+    await message.answer("Bosh mennu", reply_markup=main_btn( message.from_user.id, lat, lon))
     await state.finish()
+    
+    
     
     
 ##############  tilni o'zgartirish  ########
 
 @dp.message_handler( IsPrivate(), state=None,text="🇺🇿/🇷🇺/🇬🇧 Tilni o'zgartirish")
 async def bot_start(message: types.Message, state:FSMContext):
-    # user = db.select_user(id=message.from_user.id)
-    # await bot.send_location(chat_id=message.from_user.id, latitude=user[0], longitude=user[1])
 
     await message.answer("O'zingizga Kerakli tilni tanlang. ", reply_markup=select_lang)
-    # await state.set_state("shikoyat")
-    # print()
-
 
 
 @dp.callback_query_handler()
 async def book_invoice(call: types.CallbackQuery):
     await call.message.delete()
     await call.message.answer("✅ Til sozlandi")
-    await call.message.answer("Bosh mennu", reply_markup=main_btn)
+    user = db.select_user(id= call.from_user.id)[3].split(",")
+    lat = user[0]
+    lon = user[1]
+    await call.message.answer("Bosh mennu", reply_markup=main_btn( call.from_user.id, lat, lon))
     # await state.finish()
     
-# markets = {
-#     "1-dokon":(41.312812, 69.524208), 
-#     "2-dokon":(41.312932, 69.528208), 
-#     "3-dokon":(41.312952, 69.528202),
-#     "4-dokon":(41.312952, 69.528202),
-#     "5-dokon":(41.312952, 69.528202),
-#     "6-dokon":(41.312952, 69.528202),
-#     "7-dokon":(41.312952, 69.528202)
-# }
-# markets_name = []
-# for i in markets:
-# 	markets_name.append(i)
-
-
-
-# @dp.parse_
-
-# @dp.message_handler( IsPrivate(),text=markets_name)
-# async def bot_start(message: types.Message, state:FSMContext):
-#     # user = await db.select_user(tg_id=message.from_user.id)
-#     # locat = user[4].split(",")
-#     # lat = float(locat[0])
-#     # lon = float(locat[1])
-#     # print(lat, lon)
-#     mar = message.text
-#     # print("ok")
-#     await bot.send_location(chat_id=message.from_user.id, latitude=markets[mar][0], longitude=markets[mar][1], reply_markup=dokonlar)
-#     # await message.answer(markets[mar])
-#     await message.answer(mar)
-    
-
-
 
 
 
 #############################  PAYMENT #############################3
+
+#### Web backend tayyor bo'lishga ulgurmay qolganligi sababli  qo'lda boshlang'ich qiymatlar kiritildi #### 
 data = {
         "market": {
             "name":"1-dokon",
@@ -180,16 +144,16 @@ data = {
             "lon":56.23595
         },
         "sell_products":{
-            "kalbasa":{
-                "id":"21331$%$354%$$35",
+            "🥛 Sut":{
+                "id":"21331$%$3%$$35",
                 "price":13000,
                 "amount": 5
 
             },
-            "rolton":{
-                "id":"21331$%$354%$$35",
-                "price":13000,
-                "amount": 5
+            "🍖 Mol go'shti":{
+                "id":"21331$%$354%$5",
+                "price":58000,
+                "amount": 1
                
             }                 
         }
@@ -232,6 +196,7 @@ async def choose_shipping(query: types.ShippingQuery):
 
 @dp.pre_checkout_query_handler()
 async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery):
+
     
     user_id = pre_checkout_query.from_user.id
     
@@ -262,9 +227,20 @@ async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery)
     await bot.send_message(chat_id=pre_checkout_query.from_user.id,
                            text=check_sell1+check_sell,                                                              
                             )
+    user = db.select_user(id= user_id)[3].split(",")
+    lat = user[0]
+    lon = user[1]
     await bot.send_message(chat_id=pre_checkout_query.from_user.id,
-                           text="Tez orada siz bilan bog'lanamiz. \nQandaydir muammo yuzaga kelsa biz bilan bog'laning:\nTelegram: @Jaloliddin_Mamatmusayev \nTelefon: +998932977419", reply_markup=location)
-    date = datetime.now()
+                           text="Tez orada siz bilan bog'lanamiz. \nQandaydir muammo yuzaga kelsa biz bilan bog'laning:\nTelegram: @Jaloliddin_Mamatmusayev \nTelefon: +998932977419", reply_markup=main_btn())
+    pro = data['market']
+    name = pro['name']
+    lat = pro['lat']
+    lon = pro['lon']
+    await bot.send_location(chat_id=pre_checkout_query.from_user.id, latitude=lat, longitude=lon)
+    date = datetime.now( )
+    
+    await bot.send_message(chat_id=pre_checkout_query.from_user.id,
+                           text=f"{name} manzili.")
     # db.add_sells_products(user_id, check_sell, check_sell1, date)
     
     await bot.send_message(chat_id=973108256,

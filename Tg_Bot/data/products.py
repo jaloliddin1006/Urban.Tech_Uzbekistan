@@ -14,31 +14,32 @@ data = {
             "lon":56.23595
         },
         "sell_products":{
-            "kalbasa":{
+            "🥛 Sut":{
                 "id":"21331$%$354%$$35",
                 "price":13000,
                 "amount": 5
 
             },
-            "rolton":{
+            "🍖 Mol go'shti":{
                 "id":"21331$%$354%$$35",
-                "price":13000,
-                "amount": 5
+                "price":58000,
+                "amount": 1
                
             }                 
         }
     }
 pro = data['sell_products']
-
+desc = 0
 for i in pro:
     name = str(i+'  x '+str(pro[i]['amount']))
     price =  pro[i]['price']*pro[i]['amount']*100
+    desc += 1
     prices.append(LabeledPrice(label=name, amount=price))
 # prices.append(LabeledPrice(label="pepsi", amount=2000000))
 
 products_ = Product(
     title="Mahsulotlar uchun masofaviy to'lov",
-    description="💵 Mahsulotlarni xarid qilish uchun quidagi tugmani bosing va onlayn to'lovni amalga oshiring.\n Bu onlayn to'lov xavfsiz va bunda siz hech qanday ma'lumotlaringizni yo'qotmaysiz.",
+    description=f"Siz tanlagan mahsulotlaringiz turi: \n{desc} xil.  \n\n💵 Mahsulotlarni xarid qilish uchun quidagi tugmani bosing va onlayn to'lovni amalga oshiring.",
     currency="UZS",
     
     prices=prices,
@@ -46,7 +47,7 @@ products_ = Product(
     start_parameter="create_invoice_book_",
     photo_url='https://image.similarpng.com/very-thumbnail/2020/12/Online-payment-concept-Illustration-on-transparent-background-PNG.png',
     photo_width=1080,
-    photo_height=1080,
+    photo_height=1180,
     # photo_size=800,
     need_name=True,
     need_phone_number=True,

@@ -28,65 +28,26 @@ location_2 = ReplyKeyboardMarkup(
     
 )
 
-
-main_btn = ReplyKeyboardMarkup(
-    keyboard=[
+def main_btn(user_id, lat, lon):
+    main_btn = ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text=f"🥡 Mahsulotlarni ko'rish",web_app=WebAppInfo(url=f"https://erty.uz/{user_id}/{lat}/{lon}")),           
+            ],
+            [
+                KeyboardButton(text="🛡 Shikoyat bildirish"),           
+                KeyboardButton(text="🛍 Savatcha")           
+            ],
         [
-            KeyboardButton(text=f"🥡 Mahsulotlarni ko'rish",web_app=WebAppInfo(url="https://saleh.uz/login/")),           
-        ],
+                KeyboardButton(text="📍 Mening joylashuvim"),           
+            ],
         [
-            KeyboardButton(text="🛡 Shikoyat bildirish"),           
-            KeyboardButton(text="🛍 Savatcha")           
-        ],
-    [
-            KeyboardButton(text="📍 Mening joylashuvim"),           
-        ],
-    [
-            KeyboardButton(text="🇺🇿/🇷🇺/🇬🇧 Tilni o'zgartirish")           
-         
-    ]
-    ],
-    resize_keyboard=True,
-    input_field_placeholder="Asosiy bo'lim"
-    
-)
-
-markets = {
-    "1-dokon":(41.312812, 69.524208), 
-    "2-dokon":(41.312932, 69.528208), 
-    "3-dokon":(41.312952, 69.528202),
-    "4-dokon":(41.312952, 69.528202),
-    "5-dokon":(41.312952, 69.528202),
-    "6-dokon":(41.312952, 69.528202),
-    "7-dokon":(41.312952, 69.528202)
-}
-markets_name = []
-for i in markets:
-	markets_name.append(i)
-
-
- 
-dokonlar = ReplyKeyboardMarkup(row_width=2,
-                               resize_keyboard=True,
-                               input_field_placeholder="Mavjud do'konlar")
-
-for id in markets_name:
-    # if curr != id[1]:
-    dokonlar.insert(KeyboardButton(text=f"{id}"))
-    
-
-
+                KeyboardButton(text="🇺🇿/🇷🇺/🇬🇧 Tilni o'zgartirish")           
             
- 
-def dokonin(d):
-    for i in markets:
-    	if i==d:
-
-            dokonlar = ReplyKeyboardMarkup(row_width=2,
-                                        resize_keyboard=True,
-                                        input_field_placeholder="Tanlangan dokon")
-
-            dokonlar.insert(KeyboardButton(text=f"Mahsulotlar"))
-            # for id in markets_name:
-            #     # if curr != id[1]:
-            #     dokonlar.insert(KeyboardButton(text=f"{id}"))
+        ]
+        ],
+        resize_keyboard=True,
+        input_field_placeholder="Asosiy bo'lim"
+        
+    )
+    return main_btn
